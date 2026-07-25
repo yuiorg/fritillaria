@@ -1,0 +1,122 @@
+:root {
+  --text: #6b6375;
+  --text-h: #1a1a1a;
+  --text-secondary: #6b6b68;
+  --text-muted: #9a9992;
+  --bg: #f1efe8;
+  --surface-2: #ffffff;
+  --border: rgba(0, 0, 0, 0.15);
+  --code-bg: #f4f3ec;
+  --accent: #0c447c;
+  --accent-bg: #e6f1fb;
+  --accent-border: #185fa5;
+  --bg-gold: #fdf3d9;
+  --text-gold: #8a6a00;
+  --social-bg: rgba(244, 243, 236, 0.5);
+  --shadow:
+    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+
+  --sans: -apple-system, 'Hiragino Sans', sans-serif;
+  --heading: -apple-system, 'Hiragino Sans', sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  font: 18px/1.45 var(--sans);
+  letter-spacing: 0.18px;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  @media (max-width: 1024px) {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #9ca3af;
+    --text-h: #f1efe8;
+    --text-secondary: #b4b2a9;
+    --text-muted: #888780;
+    --bg: #2c2c2a;
+    --surface-2: #232321;
+    --border: rgba(255, 255, 255, 0.2);
+    --code-bg: #1f2028;
+    --accent: #85b7eb;
+    --accent-bg: #042c53;
+    --accent-border: #85b7eb;
+    --bg-gold: #4a3c00;
+    --text-gold: #f0d375;
+    --social-bg: rgba(47, 48, 58, 0.5);
+    --shadow:
+      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+  }
+
+  #social .button-icon {
+    filter: invert(1) brightness(2);
+  }
+}
+
+#root {
+  width: 1126px;
+  max-width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+h1,
+h2 {
+  font-family: var(--heading);
+  font-weight: 500;
+  color: var(--text-h);
+}
+
+h1 {
+  font-size: 56px;
+  letter-spacing: -1.68px;
+  margin: 32px 0;
+  @media (max-width: 1024px) {
+    font-size: 36px;
+    margin: 20px 0;
+  }
+}
+h2 {
+  font-size: 24px;
+  line-height: 118%;
+  letter-spacing: -0.24px;
+  margin: 0 0 8px;
+  @media (max-width: 1024px) {
+    font-size: 20px;
+  }
+}
+p {
+  margin: 0;
+}
+
+code,
+.counter {
+  font-family: var(--mono);
+  display: inline-flex;
+  border-radius: 4px;
+  color: var(--text-h);
+}
+
+code {
+  font-size: 15px;
+  line-height: 135%;
+  padding: 4px 8px;
+  background: var(--code-bg);
+}
