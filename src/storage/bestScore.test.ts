@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadBestScore, saveBestScoreIfHigher } from './bestScore'
 
-const STORAGE_KEY = 'statice:best-score'
+const STORAGE_KEY = 'fritillaria:best-score'
+const LEGACY_STORAGE_KEY = 'statice:best-score'
 
 beforeEach(() => {
   localStorage.clear()
@@ -50,6 +51,49 @@ describe('loadBestScore', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(null))
 
     expect(loadBestScore()).toBeNull()
+  })
+})
+
+describe('loadBestScore(旧キーからの移行)', () => {
+  const legacyStored = { version: 1, grandTotal: 150, achievedAt: '2026-01-01T00:00:00.000Z' }
+
+  it('旧キーにのみデータがある場合、その値を返す', () => {
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
+
+    expect(loadBestScore()).toEqual(legacyStored)
+  })
+
+  it('旧キーから読んだ場合、新キーに保存し直す', () => {
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
+
+    loadBestScore()
+
+    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)).toEqual(legacyStored)
+  })
+
+  it('新旧どちらにもデータがある場合、新キーの値を優先する', () => {
+    const current = { version: 1, grandTotal: 200, achievedAt: '2026-02-01T00:00:00.000Z' }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
+
+    expect(loadBestScore()).toEqual(current)
+  })
+
+  it('旧キーのデータが破損している場合はnullを返す', () => {
+    localStorage.setItem(LEGACY_STORAGE_KEY, '{invalid json')
+
+    expect(loadBestScore()).toBeNull()
+  })
+
+  it('新キーへの保存に失敗しても、旧キーから読んだ値は返す', () => {
+    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError')
+    })
+
+    expect(loadBestScore()).toEqual(legacyStored)
+
+    setItem.mockRestore()
   })
 })
 
