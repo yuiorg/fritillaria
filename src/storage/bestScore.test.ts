@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadBestScore, saveBestScoreIfHigher } from './bestScore'
 
 const STORAGE_KEY = 'fritillaria:best-score'
-const LEGACY_STORAGE_KEY = 'statice:best-score'
 
 beforeEach(() => {
   localStorage.clear()
@@ -51,79 +50,6 @@ describe('loadBestScore', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(null))
 
     expect(loadBestScore()).toBeNull()
-  })
-})
-
-describe('loadBestScore(旧キーからの移行)', () => {
-  const legacyStored = { version: 1, grandTotal: 150, achievedAt: '2026-01-01T00:00:00.000Z' }
-
-  // jsdomのlocalStorageはProxy越しのため、Storage.prototypeにもインスタンスにも
-  // spyが効かない(呼び出しが素通りする)。書き込み失敗はグローバルごと差し替えて再現する
-  function stubStorageWithFailingSetItem(initial: Record<string, string>) {
-    const store = new Map(Object.entries(initial))
-    vi.stubGlobal('localStorage', {
-      getItem: (key: string) => store.get(key) ?? null,
-      setItem: () => {
-        throw new Error('QuotaExceededError')
-      },
-      removeItem: (key: string) => store.delete(key),
-      clear: () => store.clear(),
-    })
-    return store
-  }
-
-  afterEach(() => {
-    vi.unstubAllGlobals()
-  })
-
-  it('旧キーにのみデータがある場合、その値を返す', () => {
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
-
-    expect(loadBestScore()).toEqual(legacyStored)
-  })
-
-  it('旧キーから読んだ場合、新キーに保存し直す', () => {
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
-
-    loadBestScore()
-
-    expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!)).toEqual(legacyStored)
-  })
-
-  it('新キーへの保存が成功した場合、旧キーを削除する', () => {
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
-
-    loadBestScore()
-
-    expect(localStorage.getItem(LEGACY_STORAGE_KEY)).toBeNull()
-  })
-
-  it('新旧どちらにもデータがある場合、新キーの値を優先する', () => {
-    const current = { version: 1, grandTotal: 200, achievedAt: '2026-02-01T00:00:00.000Z' }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(current))
-    localStorage.setItem(LEGACY_STORAGE_KEY, JSON.stringify(legacyStored))
-
-    expect(loadBestScore()).toEqual(current)
-  })
-
-  it('旧キーのデータが破損している場合はnullを返す', () => {
-    localStorage.setItem(LEGACY_STORAGE_KEY, '{invalid json')
-
-    expect(loadBestScore()).toBeNull()
-  })
-
-  it('新キーへの保存に失敗しても、旧キーから読んだ値は返す', () => {
-    stubStorageWithFailingSetItem({ [LEGACY_STORAGE_KEY]: JSON.stringify(legacyStored) })
-
-    expect(loadBestScore()).toEqual(legacyStored)
-  })
-
-  it('新キーへの保存に失敗した場合、旧キーを削除しない', () => {
-    const store = stubStorageWithFailingSetItem({ [LEGACY_STORAGE_KEY]: JSON.stringify(legacyStored) })
-
-    loadBestScore()
-
-    expect(JSON.parse(store.get(LEGACY_STORAGE_KEY)!)).toEqual(legacyStored)
   })
 })
 

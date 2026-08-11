@@ -1,6 +1,4 @@
 const STORAGE_KEY = 'fritillaria:best-score'
-// リポジトリ移行前のキー。既にプレイ済みのユーザーの自己ベストを読み替えるために残している
-const LEGACY_STORAGE_KEY = 'statice:best-score'
 const CURRENT_VERSION = 1
 
 export type StoredBestScore = {
@@ -22,8 +20,8 @@ function isStoredBestScore(value: unknown): value is StoredBestScore {
   )
 }
 
-function readAt(key: string): StoredBestScore | null {
-  const raw = localStorage.getItem(key)
+export function loadBestScore(): StoredBestScore | null {
+  const raw = localStorage.getItem(STORAGE_KEY)
   if (raw === null) {
     return null
   }
@@ -34,29 +32,6 @@ function readAt(key: string): StoredBestScore | null {
   } catch {
     return null
   }
-}
-
-export function loadBestScore(): StoredBestScore | null {
-  const current = readAt(STORAGE_KEY)
-  if (current !== null) {
-    return current
-  }
-
-  const legacy = readAt(LEGACY_STORAGE_KEY)
-  if (legacy === null) {
-    return null
-  }
-
-  // 旧キーの自己ベストを新キーに移し替える。書き込みに失敗しても読み取り自体は
-  // 成立させたいので、ここでは握り潰して値を返す。旧キーの削除は保存が成功した
-  // 後にのみ行う(失敗した状態で消すと自己ベストが失われる)
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy))
-    localStorage.removeItem(LEGACY_STORAGE_KEY)
-  } catch {
-    // 次回の読み込みで再度移行を試みる
-  }
-  return legacy
 }
 
 export function saveBestScoreIfHigher(grandTotal: number): StoredBestScore {
