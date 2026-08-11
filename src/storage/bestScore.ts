@@ -47,10 +47,12 @@ export function loadBestScore(): StoredBestScore | null {
     return null
   }
 
-  // 旧キーの自己ベストを新キーに保存し直す。書き込みに失敗しても読み取り自体は
-  // 成立させたいので、ここでは握り潰して値を返す
+  // 旧キーの自己ベストを新キーに移し替える。書き込みに失敗しても読み取り自体は
+  // 成立させたいので、ここでは握り潰して値を返す。旧キーの削除は保存が成功した
+  // 後にのみ行う(失敗した状態で消すと自己ベストが失われる)
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(legacy))
+    localStorage.removeItem(LEGACY_STORAGE_KEY)
   } catch {
     // 次回の読み込みで再度移行を試みる
   }
