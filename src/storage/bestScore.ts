@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'statice:best-score'
+const STORAGE_KEY = 'fritillaria:best-score'
 const CURRENT_VERSION = 1
 
 export type StoredBestScore = {

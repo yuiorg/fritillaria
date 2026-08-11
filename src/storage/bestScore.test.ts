@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { loadBestScore, saveBestScoreIfHigher } from './bestScore'
 
-const STORAGE_KEY = 'statice:best-score'
+const STORAGE_KEY = 'fritillaria:best-score'
 
 beforeEach(() => {
   localStorage.clear()
