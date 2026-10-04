@@ -21,12 +21,14 @@ function isStoredBestScore(value: unknown): value is StoredBestScore {
 }
 
 export function loadBestScore(): StoredBestScore | null {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (raw === null) {
-    return null
-  }
-
+  // ストレージへのアクセスが拒否される環境ではgetItemも例外を投げるため、
+  // JSON.parseと合わせて囲み、記録なしとして扱う
   try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw === null) {
+      return null
+    }
+
     const parsed = JSON.parse(raw)
     return isStoredBestScore(parsed) ? parsed : null
   } catch {

@@ -51,6 +51,21 @@ describe('loadBestScore', () => {
 
     expect(loadBestScore()).toBeNull()
   })
+
+  it('getItemが例外を投げる場合は例外を外へ出さずにnullを返す', () => {
+    const getItemSpy = vi
+      .spyOn(Object.getPrototypeOf(localStorage), 'getItem')
+      .mockImplementation(() => {
+        throw new DOMException('access denied', 'SecurityError')
+      })
+
+    try {
+      expect(loadBestScore()).toBeNull()
+      expect(getItemSpy).toHaveBeenCalledTimes(1)
+    } finally {
+      getItemSpy.mockRestore()
+    }
+  })
 })
 
 describe('saveBestScoreIfHigher', () => {
