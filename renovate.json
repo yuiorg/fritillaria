@@ -4,6 +4,7 @@
   "timezone": "Asia/Tokyo",
   "schedule": ["before 9am on monday"],
   "labels": ["dependencies"],
+  "assignees": ["yuiorg"],
   "prConcurrentLimit": 5,
   "rangeStrategy": "bump",
   "packageRules": [
@@ -14,7 +15,8 @@
     {
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0\\./",
-      "groupName": "non-major dependencies"
+      "groupName": "non-major dependencies",
+      "automerge": true
     }
   ],
   "vulnerabilityAlerts": {
@@ -24,6 +26,7 @@
   },
   "lockFileMaintenance": {
     "enabled": true,
+    "automerge": true,
     "schedule": ["before 9am on the first day of the month"]
   }
 }
