@@ -21,12 +21,14 @@ function isStoredBestScore(value: unknown): value is StoredBestScore {
 }
 
 export function loadBestScore(): StoredBestScore | null {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (raw === null) {
-    return null
-  }
-
+  // ストレージへのアクセスが拒否される環境ではgetItemも例外を投げるため、
+  // JSON.parseと合わせて囲み、記録なしとして扱う
   try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (raw === null) {
+      return null
+    }
+
     const parsed = JSON.parse(raw)
     return isStoredBestScore(parsed) ? parsed : null
   } catch {
@@ -45,6 +47,12 @@ export function saveBestScoreIfHigher(grandTotal: number): StoredBestScore {
     grandTotal,
     achievedAt: new Date().toISOString(),
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  // プライベートブラウジングや容量超過でsetItemが例外を投げても、
+  // 自己ベストの保存だけを諦めてゲーム終了処理は続ける
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  } catch {
+    // 保存できなかった場合も、今回のスコアを自己ベストとして返す
+  }
   return next
 }

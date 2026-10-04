@@ -51,6 +51,21 @@ describe('loadBestScore', () => {
 
     expect(loadBestScore()).toBeNull()
   })
+
+  it('getItemが例外を投げる場合は例外を外へ出さずにnullを返す', () => {
+    const getItemSpy = vi
+      .spyOn(Object.getPrototypeOf(localStorage), 'getItem')
+      .mockImplementation(() => {
+        throw new DOMException('access denied', 'SecurityError')
+      })
+
+    try {
+      expect(loadBestScore()).toBeNull()
+      expect(getItemSpy).toHaveBeenCalledTimes(1)
+    } finally {
+      getItemSpy.mockRestore()
+    }
+  })
 })
 
 describe('saveBestScoreIfHigher', () => {
@@ -108,5 +123,23 @@ describe('saveBestScoreIfHigher', () => {
     const result = saveBestScoreIfHigher(50)
 
     expect(result).toEqual({ version: 1, grandTotal: 50, achievedAt: '2026-07-17T12:00:00.000Z' })
+  })
+
+  it('setItemが例外を投げる場合は例外を外へ出さず、保存せずに新しい値を返す', () => {
+    const setItemSpy = vi
+      .spyOn(Object.getPrototypeOf(localStorage), 'setItem')
+      .mockImplementation(() => {
+        throw new DOMException('quota exceeded', 'QuotaExceededError')
+      })
+
+    try {
+      const result = saveBestScoreIfHigher(100)
+
+      expect(result).toEqual({ version: 1, grandTotal: 100, achievedAt: '2026-07-17T12:00:00.000Z' })
+      expect(setItemSpy).toHaveBeenCalledTimes(1)
+      expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+    } finally {
+      setItemSpy.mockRestore()
+    }
   })
 })
