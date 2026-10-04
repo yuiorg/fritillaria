@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import PlayScreen from './PlayScreen'
+import { saveBestScoreIfHigher as actualSaveBestScoreIfHigher } from '../storage/bestScore'
 
 const { loadBestScoreMock, saveBestScoreIfHigherMock } = vi.hoisted(() => ({
   loadBestScoreMock: vi.fn(),
@@ -210,6 +211,31 @@ describe('PlayScreen', () => {
       version: 1,
       grandTotal: 65,
       achievedAt: '2026-01-01T00:00:00.000Z',
+    })
+    mockNextRoll([1, 1, 1, 1, 1])
+    const onFinish = vi.fn()
+    render(<PlayScreen onFinish={onFinish} />)
+
+    CATEGORY_ORDER.forEach((category, index) => {
+      const isLast = index === CATEGORY_ORDER.length - 1
+      if (!isLast) {
+        mockNextRoll([1, 1, 1, 1, 1])
+      }
+      fireEvent.click(selectButton(category))
+    })
+
+    expect(onFinish).toHaveBeenCalledWith({
+      scoreSheet: expect.objectContaining({ grandTotal: 65 }),
+      isNewBest: true,
+      previousBest: null,
+    })
+  })
+
+  it('localStorage.setItemが例外を投げる環境でも、12役確定でonFinishが呼ばれる', () => {
+    loadBestScoreMock.mockReturnValueOnce(null)
+    saveBestScoreIfHigherMock.mockImplementationOnce(actualSaveBestScoreIfHigher)
+    vi.spyOn(Object.getPrototypeOf(localStorage), 'setItem').mockImplementation(() => {
+      throw new DOMException('quota exceeded', 'QuotaExceededError')
     })
     mockNextRoll([1, 1, 1, 1, 1])
     const onFinish = vi.fn()

@@ -45,6 +45,12 @@ export function saveBestScoreIfHigher(grandTotal: number): StoredBestScore {
     grandTotal,
     achievedAt: new Date().toISOString(),
   }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  // プライベートブラウジングや容量超過でsetItemが例外を投げても、
+  // 自己ベストの保存だけを諦めてゲーム終了処理は続ける
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+  } catch {
+    // 保存できなかった場合も、今回のスコアを自己ベストとして返す
+  }
   return next
 }
